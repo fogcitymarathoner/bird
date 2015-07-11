@@ -1,0 +1,41 @@
+
+{% extends "tpages/base.html" %}
+{% block content %}
+        <script type="text/javascript">
+            jQuery(function() {
+               jQuery("#id_expiration_date").datepicker({ dateFormat: 'mm/dd/yy' });
+            });
+        </script> 
+
+
+<script type="text/javascript" src="http://rocketsredglare.com/media/vendors/fckeditor/fckeditor.js"></script>
+
+    
+
+<script type="text/javascript">
+window.onload = function()
+{
+var oFCKeditor = new FCKeditor( 'id_body' ) ;
+oFCKeditor.BasePath = "/media/vendors/fckeditor/" ;
+oFCKeditor.Height = 900 ;
+oFCKeditor.ReplaceTextarea() ;
+}
+</script>
+<script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
+
+<h2>Edit Tokenized page:</h2>
+
+<form action="" method="post">
+	{% csrf_token %}	
+<table>{{ form }}
+
+<input type='hidden' name='app_key' value='{{ page.app_key }}'/>
+</table>
+
+<p><input type="submit" value="Submit" class="tokenized-page-button"></p>
+</form>
+ 
+<p>{{ expiration}}</p>
+
+<p>release date - {{ page.pub_date }}</p>
+{% endblock %}

@@ -1,0 +1,124 @@
+import json
+from django.conf import settings
+
+import urllib2
+import urllib
+import time, datetime
+from pprint import pprint
+import pycurl
+import cStringIO
+import xml.dom.minidom
+crlHeader = ["""Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5""" ,
+                                          """Accept-Language: en-us,en;q=0.5""",
+                                          #"""Accept-Encoding: gzip,deflate""",
+                                          """Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7""",
+                                          """Keep-Alive: 300""",
+                                          """Connection: keep-alive"""]
+
+def getToken(expiration, appid=None):      
+    """
+    Uses service to generate token from apikey and expiration
+    """
+    print appid
+    print 'expiration = %s'% expiration
+    if appid==None:
+        url = settings.TOKENSERVER + '/issue_api_key'
+        print "token server url %s"%url
+        req = urllib2.Request(url)
+        response = urllib2.urlopen(req)
+        response_data = response.read()
+        print response_data
+        data = json.loads(response_data)
+        app_keytx = data['api_key']
+    else:
+        app_keytx = appid
+    time.sleep(1)
+    # params for issue token call
+    url = settings.TOKENSERVER + '/issue_token'
+
+    if isinstance(expiration, basestring):
+        print 'expiration = %s is a string'% expiration
+        expDT =datetime.datetime.strptime(expiration,'%Y-%m-%d %H:%M:%S')
+    else:
+        print 'expiration = %s is NOT a string'% expiration
+        expDT = expiration
+
+    #expst = expDT.strftime('%Y-%m-%d %H:%M:%S')
+    print expDT
+    data = urllib.urlencode(dict(app_id=app_keytx, expiration=expDT))
+    response = cStringIO.StringIO()
+    crl = pycurl.Curl()
+    crl.setopt(pycurl.HTTPHEADER, crlHeader)
+    crl.setopt(crl.WRITEFUNCTION, response.write)
+    crl.setopt(pycurl.POSTFIELDS, data)
+    crl.setopt(pycurl.URL, url)
+    crl.setopt(pycurl.SSL_VERIFYPEER, 0)
+    crl.setopt(pycurl.SSL_VERIFYHOST, 0)
+    crl.perform()
+    data = json.loads(response.getvalue())
+
+    appid = data['app_id']
+    token = data['token']
+    return appid.text, token.text
+
+def getTokenList(appid):
+    """
+    Retrieves list of tokens from server for an appid
+    not in api yet
+    """
+    url = settings.TOKENSERVER+'/access_tokens/token_list.xml'
+    data = urllib.urlencode(dict(app_id=appid))
+    response = cStringIO.StringIO()
+    crl = pycurl.Curl()
+    crl.setopt(pycurl.HTTPHEADER, crlHeader)
+    crl.setopt(crl.WRITEFUNCTION, response.write)
+    crl.setopt(pycurl.POSTFIELDS, data)
+    crl.setopt(pycurl.URL, url)
+    crl.setopt(pycurl.SSL_VERIFYPEER, 0)
+    crl.setopt(pycurl.SSL_VERIFYHOST, 0)
+    crl.perform()
+    doc = fromstring(response.getvalue())
+    tokens = doc.findall('token')
+    pprint(tokens)
+    ret = []
+    for token in tokens:
+        exp = token.find('expiration')
+        ret.append( [{'token':token.attrib.get('value'), 'expiration':exp.text}])
+    return ret
+        
+def validateToken(app_id,token):
+    url = settings.TOKENSERVER+'/access_tokens/validate_token.xml'
+    print "token server url %s"%url
+    data = urllib.urlencode(dict(app_id=app_id, token=token))
+    response = cStringIO.StringIO()
+    crl = pycurl.Curl()
+    crl.setopt(pycurl.HTTPHEADER, crlHeader)
+    crl.setopt(crl.WRITEFUNCTION, response.write)
+    crl.setopt(pycurl.POSTFIELDS, data)
+    crl.setopt(pycurl.URL, url)
+    crl.setopt(pycurl.SSL_VERIFYPEER, 0)
+    crl.setopt(pycurl.SSL_VERIFYHOST, 0)
+    crl.perform()
+    doc = fromstring(response.getvalue())
+    print 'doc %s'%doc
+    print response.getvalue()
+    result = doc.find('value')
+    print result
+    return result.text
+def tinyurl(request, token):
+    view_url = request.META['wsgi.url_scheme']+'://'+request.META['HTTP_HOST']+'/tpage/'+token
+    url = settings.TINYURLSERVER+'/soap/'
+    print url
+    data = urllib.urlencode(dict(u=view_url))
+    response = cStringIO.StringIO()
+    crl = pycurl.Curl()
+    crl.setopt(pycurl.HTTPHEADER, crlHeader)
+    crl.setopt(crl.WRITEFUNCTION, response.write)
+    crl.setopt(pycurl.POSTFIELDS, data)
+    crl.setopt(pycurl.URL, url)
+    crl.setopt(pycurl.SSL_VERIFYPEER, 0)
+    crl.setopt(pycurl.SSL_VERIFYHOST, 0)
+    crl.perform()
+    result = response.getvalue()
+    print result
+    return result

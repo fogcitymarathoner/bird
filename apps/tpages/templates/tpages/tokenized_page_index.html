@@ -1,0 +1,8 @@
+
+{% extends "tpages/base.html" %}
+{% block content %}
+<a href="{% url 'tpages:add' %}">ADD Page</a>
+    {% for object in object_list %}
+      <p><a href="{% url 'tpages:toolkit' token=object.token  %}">{{ object.title }}</a></p>
+    {% endfor %}
+{% endblock %}

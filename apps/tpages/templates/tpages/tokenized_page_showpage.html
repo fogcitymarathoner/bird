@@ -1,0 +1,9 @@
+
+{% extends "tpages/base.html" %}
+{% block content %}
+<h2>{{ page.title }}</h2>
+<a href="{{ uri }}/ninetymoredays/{{ page.token }}//">{{ object.title }}</a>
+{{ page.body|safe }}
+<p>{{ expiration }}
+</p>
+{% endblock %}
