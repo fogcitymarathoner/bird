@@ -153,26 +153,25 @@ def show(request, token):
             # ...
             return HttpResponseRedirect(uri+'thanks/') # Redirect after POST
     else:
-        page = get_object_or_404(TokenizedPage,
-                                    token=token
-                                    )
+        page = get_object_or_404(TokenizedPage,token=token)
 
         if validateToken(page.app_key,token) :
             print('###############################################')
             print('###############################################')
-            print('token did validate')
+            print('token %s did validate'%token)
+            print('with %s appkey'%page.app_key)
             print('###############################################')
             print('###############################################')
             tokens = getTokenList(page.app_key);
             print('tokens')
             print(tokens)
             for tokentmp in tokens:
-                if tokentmp[0]['token'] == token:
-                    page.expiration = tokentmp[0]['expiration']
+                if tokentmp['token'] == token:
+                    page.expiration = tokentmp['expiration']
                     print((page.expiration))
                     
                     
-                    struct_time = time.strptime(page.expiration, "%Y-%m-%d %H:%M:%S %Z")
+                    struct_time = time.strptime(page.expiration, "%Y-%m-%d %H:%M:%S")
                     print (struct_time)
                     dt = datetime.fromtimestamp(time.mktime(struct_time))
             return render_to_response('tpages/tokenized_page_showpage.html',

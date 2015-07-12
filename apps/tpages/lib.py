@@ -51,14 +51,19 @@ def getTokenList(appid):
 
     data = urllib.parse.urlencode(values)
     data = data.encode('utf-8') # data should be bytes
+    print('payload %s'%values)
+
     req = urllib.request.Request(url, data)
+
     resp = urllib.request.urlopen(req)
     respData = resp.read().decode("utf-8")
 
+    print(' token list return raw %s'%respData)
     data = json.loads(respData)
+    print(' token list return %s'%data)
     ret = []
     for token in data:
-        ret.append( [{'token':token['token'], 'expiration':token['expiration']}])
+        ret.append( {'token':token['token'], 'expiration':token['expiration']})
     return ret
         
 def validateToken(app_id, token):
