@@ -8,21 +8,6 @@
         </script> 
 
 
-<script type="text/javascript" src="http://rocketsredglare.com/media/vendors/fckeditor/fckeditor.js"></script>
-
-    
-
-<script type="text/javascript">
-window.onload = function()
-{
-var oFCKeditor = new FCKeditor( 'id_body' ) ;
-oFCKeditor.BasePath = "/media/vendors/fckeditor/" ;
-oFCKeditor.Height = 900 ;
-oFCKeditor.ReplaceTextarea() ;
-}
-</script>
-<script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
-
 <h2>Edit Tokenized page:</h2>
 
 <form action="" method="post">
@@ -38,4 +23,19 @@ oFCKeditor.ReplaceTextarea() ;
 <p>{{ expiration}}</p>
 
 <p>release date - {{ page.pub_date }}</p>
+
+<script type="text/javascript" src="//fogtest.com/static/ckeditor/ckeditor.js"></script>
+<script>
+
+    // This call can be placed at any point after the
+    // <textarea>, or inside a <head><script> in a
+    // window.onload event handler.
+
+    // Replace the <textarea id="editor"> with an CKEditor
+    // instance, using default configurations.
+
+    CKEDITOR.replace( 'id_body' );
+
+</script>
+
 {% endblock %}

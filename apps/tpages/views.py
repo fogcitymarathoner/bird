@@ -5,7 +5,7 @@ from django.conf import settings
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from tpages.models import TokenizedPage
-from tpages.models import AccessToken
+
 from tpages.forms import PageAddForm, PageEditForm
 
 from django.template import RequestContext
@@ -13,16 +13,14 @@ from django.template import RequestContext
 from tpages.lib import getToken, getTokenList, validateToken, tinyurl
 from datetime import datetime as dt
 import time
-from datetime import datetime, date, timedelta
-from pprint import pprint
+from datetime import datetime, timedelta
+from django.core.urlresolvers import reverse
 
 uri = '' #settings.APP_URI
 @login_required
 def ninetymoredays(request,token):
     print('in view page')
-    page = get_object_or_404(TokenizedPage,
-                             token=token
-    )
+    page = get_object_or_404(TokenizedPage,token=token)
     print(('got page %s'%page))
     ninety = datetime.now() + timedelta(days=90)
     exp = ninety.strftime("%m/%d/%Y")
@@ -55,14 +53,13 @@ def add(request):
             body = form.cleaned_data['body']
             exp = form.cleaned_data['expiration_date']
             print(('expiration %s'%exp))
-            #expdate = time.strptime(exp.str,'%Y-%m-%d')
-        #print datetime.strptime('31/07/2013', "%d/%m/%Y").strftime("%Y-%m-%d")
+            print(('expiration type %s'%type(exp)))
             if body is not None:
 
-                appid, token = getToken(exp)
+                appid, token = getToken(exp.strftime("%Y-%m-%d %H:%M:%S"))
                 page = TokenizedPage(app_key=appid, token=token, body=body, title=title)
                 page.save()
-                return HttpResponseRedirect(uri+'tpage/toolkit/'+token) # Redirect after POST
+                return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
                 pass
             else:
                 pass
@@ -79,9 +76,9 @@ def add(request):
 def edit(request, token):
     if request.method == 'POST': # If the form has been submitted...
         
-        pprint(request.POST)
+        print(request.POST)
         form = PageAddForm(request.POST) # A form bound to the POST data
-        pprint(request.POST)
+        print(request.POST)
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data           
             title = form.cleaned_data['title']
@@ -101,7 +98,7 @@ def edit(request, token):
                     if tokentmp[0]['token'] == token:
                         page.expiration = tokentmp[0]['expiration']
 
-                return HttpResponseRedirect(uri+'tpage/toolkit/'+token) # Redirect after POST
+                return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
                 pass
             else:
                 pass
@@ -134,16 +131,13 @@ def delete(request,token):
                                     token=token
                                     )
     page.delete()
-    return HttpResponseRedirect(uri+'tpage/') # Redirect after POST
+    return HttpResponseRedirect(reverse('tpages:list', args=(), kwargs={})) # Redirect after POST
 
 @login_required
 def toolkit(request, token):
 
     page = get_object_or_404(TokenizedPage, token=token)
     page.status = validateToken(page.app_key, token)
-
-
-
     return render_to_response('tpages/tokenized_page_toolkit.html',
                           {
                            'page': page,
@@ -179,7 +173,7 @@ def show(request, token):
                     
                     
                     struct_time = time.strptime(page.expiration, "%Y-%m-%d %H:%M:%S %Z")
-                    pprint (struct_time)
+                    print (struct_time)
                     dt = datetime.fromtimestamp(time.mktime(struct_time))
             return render_to_response('tpages/tokenized_page_showpage.html',
                               {
@@ -201,9 +195,6 @@ def show(request, token):
 @login_required
 def list(request):
     return render_to_response('tpages/tokenized_page_index.html',
-                              {
-                               'object_list':TokenizedPage.objects.all()
-                               },
-                context_instance=RequestContext(request)
-                              )
+                              {'object_list':TokenizedPage.objects.all()},
+                                context_instance=RequestContext(request))
 

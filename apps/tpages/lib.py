@@ -1,6 +1,6 @@
 import json
 from django.conf import settings
-
+from datetime import datetime as dt
 import urllib.parse
 import urllib.request
 
@@ -16,40 +16,29 @@ def getToken(expiration, appid=None):
         print("token server url %s"%url)
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
-        response_data = response.read()
+        response_data = response.read().decode("utf-8")
         print(response_data)
         data = json.loads(response_data)
-        app_keytx = data['api_key']
+        app_keytx = data['app_id']
     else:
         app_keytx = appid
-    time.sleep(1)
+
     # params for issue token call
-    url = settings.TOKENSERVER + '/issue_token'
+    url = settings.TOKENSERVER + '/issue_token/' # don't forget trailing '/'
 
-    if isinstance(expiration, str):
-        print('expiration = %s is a string'% expiration)
-        expDT =datetime.datetime.strptime(expiration,'%Y-%m-%d %H:%M:%S')
-    else:
-        print('expiration = %s is NOT a string'% expiration)
-        expDT = expiration
+    values = {'app_id' : app_keytx,
+          'expiration' : expiration,
+           }
+    data = urllib.parse.urlencode(values)
+    data = data.encode('utf-8') # data should be bytes
+    print('payload %s'%values)
+    req = urllib.request.Request(url, data)
+    resp = urllib.request.urlopen(req)
+    respData = resp.read().decode("utf-8")
 
-    #expst = expDT.strftime('%Y-%m-%d %H:%M:%S')
-    print(expDT)
-    data = urllib.parse.urlencode(dict(app_id=app_keytx, expiration=expDT))
-    response = io.StringIO()
-    crl = pycurl.Curl()
-    crl.setopt(pycurl.HTTPHEADER, crlHeader)
-    crl.setopt(crl.WRITEFUNCTION, response.write)
-    crl.setopt(pycurl.POSTFIELDS, data)
-    crl.setopt(pycurl.URL, url)
-    crl.setopt(pycurl.SSL_VERIFYPEER, 0)
-    crl.setopt(pycurl.SSL_VERIFYHOST, 0)
-    crl.perform()
-    data = json.loads(response.getvalue())
-
-    appid = data['app_id']
-    token = data['token']
-    return appid.text, token.text
+    print(respData)
+    retdat = json.loads(respData)
+    return retdat['app_id'], retdat['token']
 
 def getTokenList(appid):
     """

@@ -21,3 +21,4 @@ class PageEditForm(forms.ModelForm):
 
     class Meta:
         model = TokenizedPage
+        fields = ['title', 'body']
