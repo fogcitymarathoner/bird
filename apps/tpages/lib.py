@@ -82,7 +82,8 @@ def validateToken(app_id, token):
     data = json.loads(respData)
 
     return data['value']
-
+def validatePage(page):
+    return validateToken(page.app_key, page.token)
 def tinyurl(request, token):
     view_url = request.META['wsgi.url_scheme']+'://'+request.META['HTTP_HOST']+'/tpage/'+token
     url = settings.TINYURLSERVER+'/soap/'

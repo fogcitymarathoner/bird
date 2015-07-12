@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, include, url, handler404, handler500
 from django.contrib import admin
 
 urlpatterns = patterns('',
@@ -10,3 +10,7 @@ urlpatterns = patterns('',
     url(r'^tpages/', include('tpages.urls', namespace='tpages')),
 
 )
+
+# custom error handlers
+handler404 = 'errors.views.error404'
+handler500 = 'errors.views.error500'

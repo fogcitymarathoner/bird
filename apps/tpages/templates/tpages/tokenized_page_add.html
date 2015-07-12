@@ -1,36 +1,6 @@
-
-{% extends "tpages/base.html" %}
+{% extends "tpages/base.html" %}{% load filters %}
 {% block content %}
-        <script type="text/javascript">
-            jQuery(function() {
-               jQuery("#id_expiration_date").datepicker({ dateFormat: 'mm/dd/yy' });
-            });
-        </script> 
-
-{{ media }}
-<h2>Add a tokenized page:</h2>
-
-<form action="add" method="post">{% csrf_token %}
-    <table>{{ form }}
-
-
-    </table>
-
-    <p><input type="submit" value="Submit" class="tokenized-page-button"></p>
-</form>
-
-<script type="text/javascript" src="//fogtest.com/static/ckeditor/ckeditor.js"></script>
-<script>
-
-    // This call can be placed at any point after the
-    // <textarea>, or inside a <head><script> in a
-    // window.onload event handler.
-
-    // Replace the <textarea id="editor"> with an CKEditor
-    // instance, using default configurations.
-
-    CKEDITOR.replace( 'id_body' );
-
-</script>
-
+    <h2>Add a tokenized page:</h2>
+    {% include "tpages/_form.html" %}
+    {% include "tpages/_run_datepicker_ckeditor.html" %}
 {% endblock %}

@@ -7,6 +7,12 @@ from tpages.lib import getToken, getTokenList, validateToken, tinyurl
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
+        """
+        add 90 more days to tokens expiration on pages
+        :param args:
+        :param options:
+        :return:
+        """
         pages = TokenizedPage.objects.all()
         for page in pages:
 

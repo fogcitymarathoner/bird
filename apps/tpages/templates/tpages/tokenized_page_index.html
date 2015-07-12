@@ -1,8 +1,26 @@
-
-{% extends "tpages/base.html" %}
+{% extends "tpages/base.html" %}{% load filters %}
 {% block content %}
 <a href="{% url 'tpages:add' %}">ADD Page</a>
+    <table>
     {% for object in object_list %}
-      <p><a href="{% url 'tpages:toolkit' token=object.token  %}">{{ object.title }}</a></p>
+      <tr>
+          <td>{{ object|pub_date }}</td>
+          <td><a href="{% url 'tpages:toolkit' token=object.token  %}">{{ object.title }}</a></td>
+          <td><a href="{% url 'tpages:delete' token=object.token  %}" class='del'  >Delete</a></td>
+          <td><a href="{% url 'tpages:ninetymoredays' token=object.token  %}"  class='del' >Ninety More Days</a></td>
+      </tr>
     {% endfor %}
+    </table>
+
+    <script>
+    $(document).ready(function(){
+      $(".del").click(function(){
+        if (!confirm("Do you want to delete")){
+          return false;
+        }
+      });
+    });
+    </script>
+
+
 {% endblock %}

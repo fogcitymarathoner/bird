@@ -1,9 +1,7 @@
+{% extends "tpages/base.html" %}{% load filters %}
 
-{% extends "tpages/base.html" %}
 {% block content %}
-<h2>{{ page.title }}</h2>
-<a href="{{ uri }}/ninetymoredays/{{ page.token }}//">{{ object.title }}</a>
-{{ page.body|safe }}
-<p>{{ expiration }}
-</p>
+    <h2>{{ page.title }}</h2>
+    {{ page.body|safe }}
+    <p>{{ page|expiration }}</p>
 {% endblock %}

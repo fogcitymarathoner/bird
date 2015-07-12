@@ -25,11 +25,11 @@ sys.path.insert(0, APPS_DIR)
 SECRET_KEY = 'w1!!ws-3659qop#w!2yu1o+uup)n9mepja18j+o4=&b#9k2n#@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['fogtest.com']
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'errors',
     'django_nose',
     'tpages'
 )

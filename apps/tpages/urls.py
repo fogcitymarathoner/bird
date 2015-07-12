@@ -7,6 +7,7 @@ from tpages.views import delete
 from tpages.views import toolkit
 from tpages.views import ninetymoredays
 from tpages.views import show
+
 urlpatterns = patterns('',
     url(r'^add', add, name='add'),
     url(r'^$', list, name='list'),

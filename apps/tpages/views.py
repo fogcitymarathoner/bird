@@ -1,12 +1,14 @@
 from django.shortcuts import  get_object_or_404, render_to_response
 
 from django.http import HttpResponseRedirect
+from django.http import Http404
 from django.conf import settings
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from tpages.models import TokenizedPage
 
-from tpages.forms import PageAddForm, PageEditForm
+from tpages.forms import PageForm
+from tpages.models import TokenizedPage
 
 from django.template import RequestContext
 
@@ -16,9 +18,9 @@ import time
 from datetime import datetime, timedelta
 from django.core.urlresolvers import reverse
 
-uri = '' #settings.APP_URI
+
 @login_required
-def ninetymoredays(request,token):
+def ninetymoredays(request, token):
     print('in view page')
     page = get_object_or_404(TokenizedPage,token=token)
     print(('got page %s'%page))
@@ -41,73 +43,49 @@ def ninetymoredays(request,token):
     print('##########################################')
     print('##########################################')
     page.save()
-    return HttpResponseRedirect('/tpage/'+token) # Redirect after POST
+    return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
 
 @login_required
 def add(request):
     if request.method == 'POST': # If the form has been submitted...
-        form = PageAddForm(request.POST) # A form bound to the POST data
+        form = PageForm(request.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
-            # Process the data in form.cleaned_data           
+
             title = form.cleaned_data['title']
             body = form.cleaned_data['body']
-            exp = form.cleaned_data['expiration_date']
-            print(('expiration %s'%exp))
-            print(('expiration type %s'%type(exp)))
-            if body is not None:
+            appid, token = getToken(form.cleaned_data['expiration'].strftime("%Y-%m-%d %H:%M:%S"))
+            page = TokenizedPage(app_key=appid, token=token, body=body, title=title)
+            page.save()
+            return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
 
-                appid, token = getToken(exp.strftime("%Y-%m-%d %H:%M:%S"))
-                page = TokenizedPage(app_key=appid, token=token, body=body, title=title)
-                page.save()
-                return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
-                pass
-            else:
-                pass
     else:
-        form = PageAddForm() # An unbound form
-    return render_to_response('tpages/tokenized_page_add.html',
-                              {
-                               'form': form,
-                               },
-                context_instance=RequestContext(request)
-                              )
+        form = PageForm() # An unbound form
+    return render_to_response('tpages/tokenized_page_add.html',{'form': form,},context_instance=RequestContext(request))
 
 @login_required
 def edit(request, token):
     if request.method == 'POST': # If the form has been submitted...
         
         print(request.POST)
-        form = PageAddForm(request.POST) # A form bound to the POST data
+        form = PageForm(request.POST) # A form bound to the POST data
         print(request.POST)
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data           
-            title = form.cleaned_data['title']
-            body = form.cleaned_data['body']
-            app_key = request.POST['app_key']
-            print(app_key)
-            if body is not None:
-                
-                page = get_object_or_404(TokenizedPage,
-                                    app_key=app_key
-                                    )
-                page.body = body
-                page.title = title
-                page.save()
-                tokens = getTokenList(page.app_key);
-                for tokentmp in tokens:
-                    if tokentmp[0]['token'] == token:
-                        page.expiration = tokentmp[0]['expiration']
 
-                return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
-                pass
-            else:
-                pass
+            page = get_object_or_404(TokenizedPage, app_key=token)
+            page.body = form.cleaned_data['body']
+            page.title = form.cleaned_data['title']
+            page.save()
+
+            return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': page.app_key})) # Redirect after POST
+
     else:
         
         page = get_object_or_404(TokenizedPage,token=token)
-        form = PageEditForm(instance=page) 
+        form = PageForm(instance=page)
 
         tokens = getTokenList(page.app_key);
+        # in case there are no tokens?
         exp = dt.now()
         for tokentmp in tokens:
             if tokentmp[0]['token'] == token:
@@ -127,9 +105,13 @@ def edit(request, token):
 
 @login_required
 def delete(request,token):
-    page = get_object_or_404(TokenizedPage,
-                                    token=token
-                                    )
+    """
+    delete the tokenized pages after verifying
+    :param request:
+    :param token:
+    :return:
+    """
+    page = get_object_or_404(TokenizedPage, token=token)
     page.delete()
     return HttpResponseRedirect(reverse('tpages:list', args=(), kwargs={})) # Redirect after POST
 
@@ -137,11 +119,10 @@ def delete(request,token):
 def toolkit(request, token):
 
     page = get_object_or_404(TokenizedPage, token=token)
-    page.status = validateToken(page.app_key, token)
     return render_to_response('tpages/tokenized_page_toolkit.html',
                           {
-                           'page': page,
-                           'tinyurl': 'tiny url is broken',
+                                'page': page,
+                                'tinyurl': 'tiny url is broken',
                            },
             context_instance=RequestContext(request)
                           )
@@ -151,7 +132,7 @@ def show(request, token):
         #if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
             # ...
-            return HttpResponseRedirect(uri+'thanks/') # Redirect after POST
+            return Http404('bad page')
     else:
         page = get_object_or_404(TokenizedPage,token=token)
 
@@ -162,22 +143,9 @@ def show(request, token):
             print('with %s appkey'%page.app_key)
             print('###############################################')
             print('###############################################')
-            tokens = getTokenList(page.app_key);
-            print('tokens')
-            print(tokens)
-            for tokentmp in tokens:
-                if tokentmp['token'] == token:
-                    page.expiration = tokentmp['expiration']
-                    print((page.expiration))
-                    
-                    
-                    struct_time = time.strptime(page.expiration, "%Y-%m-%d %H:%M:%S")
-                    print (struct_time)
-                    dt = datetime.fromtimestamp(time.mktime(struct_time))
             return render_to_response('tpages/tokenized_page_showpage.html',
                               {
                                'page': page,
-                               'expiration': dt.strftime("Page access expires %m/%d/%Y."),
                                'tinyurl': 'tinyurl is broke',#tinyurl(request, token),
                                },
                 context_instance=RequestContext(request)
@@ -189,7 +157,7 @@ def show(request, token):
             print('###############################################')
             print('###############################################')
 
-            return HttpResponseRedirect(uri+'thanks/') # Redirect after POST
+            return Http404('bad page') # Redirect after POST
         
 @login_required
 def list(request):
