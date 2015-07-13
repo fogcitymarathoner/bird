@@ -4,6 +4,9 @@ from datetime import timedelta as td
 from tpages.models import TokenizedPage
 
 from tpages.lib import getToken, getTokenList, validateToken, tinyurl
+
+import logging
+logger = logging.getLogger(__name__)
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -16,23 +19,23 @@ class Command(BaseCommand):
         pages = TokenizedPage.objects.all()
         for page in pages:
 
-            print(('got page %s'%page))
+            logger.debug(('got page %s'%page))
             ninety = dt.now() + td(days=90)
             exp = ninety.strftime("%m/%d/%Y")
-            print(exp)
+            logger.debug(exp)
             expDT = dt.strptime(exp,'%m/%d/%Y')
             expst = expDT.strftime('%Y-%m-%d %H:%M:%S')
-            print(expst)
+            logger.debug(expst)
 
             appid, token = getToken(expst)
             page.app_key = appid
             page.token = token
-            print('##########################################')
-            print('##########################################')
-            print('##########################################')
-            print('new token')
-            print(('apiid = %s'%appid))
-            print(('token =%s'%token))
-            print('##########################################')
-            print('##########################################')
+            logger.debug('##########################################')
+            logger.debug('##########################################')
+            logger.debug('##########################################')
+            logger.debug('new token')
+            logger.debug(('apiid = %s'%appid))
+            logger.debug(('token =%s'%token))
+            logger.debug('##########################################')
+            logger.debug('##########################################')
             page.save()

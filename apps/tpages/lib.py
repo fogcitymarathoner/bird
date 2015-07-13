@@ -4,20 +4,22 @@ from datetime import datetime as dt
 import urllib.parse
 import urllib.request
 
+import logging
+logger = logging.getLogger(__name__)
 
 def getToken(expiration, appid=None):      
     """
     Uses service to generate token from apikey and expiration
     """
-    print(appid)
-    print('expiration = %s'% expiration)
+    logger.debug(appid)
+    logger.debug('expiration = %s'% expiration)
     if appid==None:
         url = settings.TOKENSERVER + '/issue_api_key'
-        print("token server url %s"%url)
+        logger.debug("token server url %s"%url)
         req = urllib.request.Request(url)
         response = urllib.request.urlopen(req)
         response_data = response.read().decode("utf-8")
-        print(response_data)
+        logger.debug(response_data)
         data = json.loads(response_data)
         app_keytx = data['app_id']
     else:
@@ -31,12 +33,12 @@ def getToken(expiration, appid=None):
            }
     data = urllib.parse.urlencode(values)
     data = data.encode('utf-8') # data should be bytes
-    print('payload %s'%values)
+    logger.debug('payload %s'%values)
     req = urllib.request.Request(url, data)
     resp = urllib.request.urlopen(req)
     respData = resp.read().decode("utf-8")
 
-    print(respData)
+    logger.debug(respData)
     retdat = json.loads(respData)
     return retdat['app_id'], retdat['token']
 
@@ -51,16 +53,16 @@ def getTokenList(appid):
 
     data = urllib.parse.urlencode(values)
     data = data.encode('utf-8') # data should be bytes
-    print('payload %s'%values)
+    logger.debug('payload %s'%values)
 
     req = urllib.request.Request(url, data)
 
     resp = urllib.request.urlopen(req)
     respData = resp.read().decode("utf-8")
 
-    print(' token list return raw %s'%respData)
+    logger.debug(' token list return raw %s'%respData)
     data = json.loads(respData)
-    print(' token list return %s'%data)
+    logger.debug(' token list return %s'%data)
     ret = []
     for token in data:
         ret.append( {'token':token['token'], 'expiration':token['expiration']})
@@ -87,7 +89,7 @@ def validatePage(page):
 def tinyurl(request, token):
     view_url = request.META['wsgi.url_scheme']+'://'+request.META['HTTP_HOST']+'/tpage/'+token
     url = settings.TINYURLSERVER+'/soap/'
-    print(url)
+    logger.debug(url)
     data = urllib.parse.urlencode(dict(u=view_url))
     response = io.StringIO()
     crl = pycurl.Curl()
@@ -99,5 +101,5 @@ def tinyurl(request, token):
     crl.setopt(pycurl.SSL_VERIFYHOST, 0)
     crl.perform()
     result = response.getvalue()
-    print(result)
+    logger.debug(result)
     return result

@@ -8,3 +8,6 @@ class PageForm(forms.ModelForm):
     class Meta:
         model = TokenizedPage
         fields = ['title', 'body']
+        widgets = {
+            'title': forms.Textarea(attrs={'cols': 80, 'rows': 1}),
+        }

@@ -3,6 +3,8 @@ from datetime import datetime as dt
 from tpages.lib import getTokenList, validatePage
 import time
 
+import logging
+logger = logging.getLogger(__name__)
 register = template.Library()
 
 
@@ -15,12 +17,12 @@ def expiration(value):
     """
 
     tokens = getTokenList(value.app_key);
-    print('tokens')
+    logger.debug('tokens')
     exp = dt.now()
     for tokentmp in tokens:
         if tokentmp['token'] == value.token:
             value.expiration = tokentmp['expiration']
-            print((value.expiration))
+            logger.debug((value.expiration))
 
 
             struct_time = time.strptime(value.expiration, "%Y-%m-%d %H:%M:%S")
