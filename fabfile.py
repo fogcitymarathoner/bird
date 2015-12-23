@@ -27,6 +27,9 @@ PROJECT_NAME = parray[len(parray)-1]
 def cwd_backup():
     backup(PROJECT_NAME)
 
+from lib_fabfile import backup_quick
+def cwd_quick_backup():
+    backup_quick(PROJECT_NAME)
 def sync():
     """
     copy local changes in SRC to sfgeek.net:python_test_apps/bird using rsync
