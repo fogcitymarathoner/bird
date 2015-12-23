@@ -56,7 +56,7 @@ def add(request):
 
             title = form.cleaned_data['title']
             body = form.cleaned_data['body']
-            appid, token = getToken(form.cleaned_data['expiration'].strftime("%Y-%m-%d %H:%M:%S"))
+            appid, token = getToken(form.cleaned_data['expiration'].strftime("%m/%d/%Y"))
             page = TokenizedPage(app_key=appid, token=token, body=body, title=title)
             page.save()
             return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
