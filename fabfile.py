@@ -16,6 +16,20 @@ EXCLUDES = '--exclude="local_settings.py" --exclude="*/tmp/*" --exclude=".git/*"
 DEV_SRV = 'sfgeek.net'
 
 
+
+os.sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from lib_fabfile import backup
+
+# calculate project name from folder name
+parray = os.path.dirname(os.path.realpath(__file__)).split(os.sep)
+PROJECT_NAME = parray[len(parray)-1]
+
+def cwd_backup():
+    backup(PROJECT_NAME)
+
+from lib_fabfile import backup_quick
+def cwd_quick_backup():
+    backup_quick(PROJECT_NAME)
 def sync():
     """
     copy local changes in SRC to sfgeek.net:python_test_apps/bird using rsync
