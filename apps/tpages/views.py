@@ -31,7 +31,7 @@ def ninetymoredays(request, token):
     exp = ninety.strftime("%m/%d/%Y")
     logger.debug(exp)
     expDT =datetime.strptime(exp,'%m/%d/%Y')
-    expst = expDT.strftime('%m/%d/%Y')
+    expst = expDT.strftime('%Y-%m-%d %H:%M:%S')
     logger.debug(expst)
 
     appid, token = getToken(expst)
@@ -56,14 +56,14 @@ def add(request):
 
             title = form.cleaned_data['title']
             body = form.cleaned_data['body']
-            appid, token = getToken(form.cleaned_data['expiration'].strftime("%m/%d/%Y"))
+            appid, token = getToken(form.cleaned_data['expiration'].strftime("%Y-%m-%d %H:%M:%S"))
             page = TokenizedPage(app_key=appid, token=token, body=body, title=title)
             page.save()
             return HttpResponseRedirect(reverse('tpages:toolkit', args=(), kwargs={'token': token})) # Redirect after POST
 
     else:
         exp = dt.now()+td(days=90)
-        form = PageForm(initial={'expiration': exp.strftime('%m/%d/%Y')}) # An unbound form
+        form = PageForm(initial={'expiration': exp.strftime('%Y-%m-%d %H:%M:%S')}) # An unbound form
     return render_to_response('tpages/tokenized_page_add.html',{'form': form,},context_instance=RequestContext(request))
 
 @login_required
@@ -96,7 +96,7 @@ def edit(request, token):
 
             if tokentmp['token'] == token:
                 page.expiration = tokentmp['expiration']
-                struct_time = time.strptime(page.expiration, "%m/%d/%Y")
+                struct_time = time.strptime(page.expiration, "%Y-%m-%d %H:%M:%S")
 
                 exp = datetime.fromtimestamp(time.mktime(struct_time))
 

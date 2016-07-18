@@ -10,8 +10,9 @@
     <p>{{ page.expiration }}</p>
     <p> tinyurl<a href="{{ tinyurl|safe }}">{{ page.title }}</a></p>
 
-    <p>{{ page|page_valid }}</p>
+    <p>{{ page|page_valid }}</p> 
     <p>{{ page|expiration }}</p>
+
     <p>{{ page|pub_date }}</p>
 
 {% endblock %}

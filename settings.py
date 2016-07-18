@@ -7,7 +7,7 @@ https://docs.djangoproject.com/en/1.7/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
-TOKENSERVER = 'https://sfrails.com'
+TOKENSERVER = 'http://54.188.171.114:8110'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os, sys
@@ -25,7 +25,7 @@ sys.path.insert(0, APPS_DIR)
 SECRET_KEY = 'w1!!ws-3659qop#w!2yu1o+uup)n9mepja18j+o4=&b#9k2n#@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 TEMPLATE_DEBUG = True
 

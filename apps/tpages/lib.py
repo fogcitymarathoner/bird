@@ -50,7 +50,7 @@ def getTokenList(appid):
 
     values = {'app_id' : appid}
     url = settings.TOKENSERVER + '/token_list/'
-
+    print(url)
     data = urllib.parse.urlencode(values)
     data = data.encode('utf-8') # data should be bytes
     logger.debug('payload %s'%values)
